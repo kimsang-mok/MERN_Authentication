@@ -4,8 +4,8 @@ dotenv.config();
 
 function auth(req, res, next) {
   const token = req.header("x-auth-token");
-  console.log(token);
-  console.log(process.env.JWT_SECRET);
+  // console.log(token);
+  // console.log(process.env.JWT_SECRET);
 
   // check if no token
   if (!token) {
