@@ -7,6 +7,8 @@ export const signupValidator = [
     .not()
     .isEmpty()
     .withMessage("Username cannot be empty")
+    .isLength({ min: 4 })
+    .withMessage("Username must be at least 4 characters long")
     .matches(usernamePattern)
     .withMessage("Username can only contain letters, numbers, and underscores"),
   check("email").isEmail().withMessage("Invalid email address"),

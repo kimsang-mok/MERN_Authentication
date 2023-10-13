@@ -15,7 +15,7 @@ export const signup = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     }
 
     const payload = {
@@ -31,11 +31,55 @@ export const signup = async (req, res) => {
       to: email,
       subject: "ACCOUNT ACTIVATION LINK",
       html: `
-                <h1>Please use the following link to activate your account</h1>
-                <hr />
-                <p>${process.env.CLIENT_URL}/api/account-activation/${token}</p>
-                <p>This email may contain sensitive information</p>
-                <p>${process.env.CLIENT_URL}</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            /* Add your custom CSS styles here */
+            .container {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              background-color: #f2f2f2;
+              padding: 20px;
+            }
+            .header {
+              background-color: #007BFF;
+              padding: 20px;
+            }
+            .header h1 {
+              color: #ffffff;
+            }
+            .content {
+              background-color: #ffffff;
+              padding: 20px;
+            }
+            .button {
+              display: inline-block;
+              background-color: #007BFF;
+              color: #ffffff;
+              padding: 10px 20px;
+              text-decoration: none;
+              border-radius: 5px;
+            }
+            a[href] {
+              color: #fffff
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Account Verification</h1>
+            </div>
+            <div class="content">
+              <p>Hello there,</p>
+              <p>Thank you for signing up with our service. To verify your account, please click the button below:</p>
+              <a class="button" href="${process.env.CLIENT_URL}/api/account-activation/${token}">Verify Your Account</a>
+              <p>Thank you for choosing our service!</p>
+            </div>
+          </div>
+        </body>
+        </html>
             `,
     };
     // res.send(emailData)
@@ -73,27 +117,37 @@ export const accountActivation = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     let user = await User.findOne({ email });
     console.log(user);
 
     if (!user) {
-      return res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
+      return res.status(401).json({
+        errors: [
+          { msg: "User with that email does not exist. Please signup!" },
+        ],
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
+      return res.status(401).json({
+        exists: true,
+        errors: [{ msg: "Password does not match." }],
+      });
     }
 
+    const { _id, username, role } = user;
+
     const payload = {
-      user: {
-        id: user.id,
-      },
+      user: { _id, username, email, role },
     };
-    jwt.sign(payload, JWT_SECRET, { expiresIn: 360000 }, (err, token) => {
-      if (err) throw err;
+    jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }, (err, token) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send("Server error");
+      }
+
       res.json({ token });
     });
   } catch (err) {

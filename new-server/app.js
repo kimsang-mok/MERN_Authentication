@@ -20,7 +20,7 @@ mongoose
   .catch((err) => console.log("Database connection error!", err));
 
 if (process.env.NODE_ENV === "development") {
-  app.use(cors({ origin: CLIENT_URL }));
+  app.use(cors());
   app.use(morgan("dev"));
 }
 
