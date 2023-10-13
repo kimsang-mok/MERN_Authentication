@@ -1,9 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
-import signupRoute from "./routes/signupRoutes.js";
 import testRoute from "./routes/testRoutes.js";
-import loginRoute from "./routes/loginRoutes.js";
-import accActivateRoute from "./routes/accActivateRoutes.js";
+import authRoute from "./routes/authRoutes.js";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
@@ -26,9 +24,11 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use("/api/login", loginRoute);
-app.use("/api/signup", signupRoute);
-app.use("/api/account-activation/", accActivateRoute);
+app.use("/api", authRoute);
+
+// app.use("/api/login", loginRoute);
+// app.use("/api/signup", signupRoute);
+// app.use("/api/account-activation/", accActivateRoute);
 app.use("/test", testRoute);
 
 app.listen(PORT, () => {
