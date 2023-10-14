@@ -11,8 +11,11 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
-import { handleLogin } from "../utils/formSubmission";
+import { useEffect, useState } from "react";
+import { handleLogin } from "../helpers/formSubmission";
+import { useNavigate } from "react-router-dom";
+import { isAuth } from "../helpers/userInfo";
+
 function Copyright(props) {
   return (
     <Typography
@@ -37,8 +40,17 @@ export default function Login() {
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isEmailExist, setIsEmailExist] = useState(true);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  console.log(isEmailExist);
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
 
   return (
     <>
@@ -64,9 +76,12 @@ export default function Login() {
               onSubmit={(e) =>
                 handleLogin(
                   e,
+                  email,
+                  password,
                   setIsEmailValid,
                   setIsEmailExist,
-                  setIsPasswordCorrect
+                  setIsPasswordCorrect,
+                  navigate
                 )
               }
               noValidate
@@ -74,6 +89,7 @@ export default function Login() {
             >
               <TextField
                 margin="normal"
+                onChange={handleEmailChange}
                 error={!isEmailValid || !isEmailExist}
                 required
                 fullWidth
@@ -94,6 +110,7 @@ export default function Login() {
                 margin="normal"
                 required
                 fullWidth
+                onChange={handlePasswordChange}
                 error={!isPasswordCorrect}
                 name="password"
                 label="Password"

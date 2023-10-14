@@ -8,6 +8,10 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
 
+function encodeDotToHyphen(inputString) {
+  return inputString.replace(/\./g, "-");
+}
+
 export const signup = async (req, res) => {
   const { username, email, password } = req.body;
   console.log(req.body);
@@ -25,6 +29,8 @@ export const signup = async (req, res) => {
     };
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "10m" });
+
+    const encodedToken = encodeDotToHyphen(token);
 
     const emailData = {
       from: EMAIL_ADDRESS,
@@ -74,7 +80,7 @@ export const signup = async (req, res) => {
             <div class="content">
               <p>Hello there,</p>
               <p>Thank you for signing up with our service. To verify your account, please click the button below:</p>
-              <a class="button" href="${process.env.CLIENT_URL}/api/account-activation/${token}">Verify Your Account</a>
+              <a class="button" href="http://localhost:5173/api/account-activate/${encodedToken}">Verify Your Account</a>
               <p>Thank you for choosing our service!</p>
             </div>
           </div>
@@ -84,6 +90,7 @@ export const signup = async (req, res) => {
     };
     // res.send(emailData)
     sendEmail(req, res, emailData);
+    console.log(token);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -138,9 +145,9 @@ export const login = async (req, res) => {
     }
 
     const { _id, username, role } = user;
-
+    const userInfo = { _id, username, email, role };
     const payload = {
-      user: { _id, username, email, role },
+      userInfo,
     };
     jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }, (err, token) => {
       if (err) {
@@ -148,7 +155,7 @@ export const login = async (req, res) => {
         return res.status(500).send("Server error");
       }
 
-      res.json({ token });
+      res.json({ userInfo, token });
     });
   } catch (err) {
     console.error(err.message);

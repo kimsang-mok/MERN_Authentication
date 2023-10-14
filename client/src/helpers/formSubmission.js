@@ -1,4 +1,6 @@
-import axios from "./api";
+import { redirect } from "react-router-dom";
+import axios from "../utils/api";
+import { authenticate, isAuth } from "./userInfo";
 
 const usernameCheck = (username) => {
   if (username.length < 4) {
@@ -18,9 +20,11 @@ export const handleSignup = async (
   setIsUsernameValid,
   setIsEmailValid,
   setIsPasswordValid,
-  setIsEmailExist
+  setIsEmailExist,
+  navigate
 ) => {
   event.preventDefault();
+
   const data = new FormData(event.currentTarget);
   const username = data.get("username");
   const email = data.get("email");
@@ -44,6 +48,7 @@ export const handleSignup = async (
 
     try {
       const response = await axios.post("/api/signup/", user);
+      navigate("/api/instruction");
       console.log(response);
     } catch (err) {
       if (err.response && err.response.status === 409) {
@@ -58,14 +63,15 @@ export const handleSignup = async (
 
 export const handleLogin = async (
   event,
+  email,
+  password,
   setIsEmailValid,
   setIsEmailExist,
-  setIsPasswordCorrect
+  setIsPasswordCorrect,
+  navigate
 ) => {
   event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  const email = data.get("email");
-  const password = data.get("password");
+
   const emailResult = emailCheck(email);
   setIsEmailValid(emailResult);
 
@@ -75,11 +81,18 @@ export const handleLogin = async (
   }
 
   try {
-    const response = await axios.post("/api/login", { email, password });
-    setIsPasswordCorrect(true);
-    console.log(response);
+    if (email && password) {
+      const response = await axios.post("/api/login", { email, password });
+      setIsPasswordCorrect(true);
+      setIsEmailExist(true);
+      authenticate(response, () => console.log("Success!"));
+      if (isAuth()) {
+        navigate("/");
+      }
+      console.log(response);
+    }
   } catch (err) {
-    if (err.response.status === 401) {
+    if (err.response && err.response.status === 401) {
       if (err.response.data.exists) {
         setIsEmailExist(true);
         setIsPasswordCorrect(false);

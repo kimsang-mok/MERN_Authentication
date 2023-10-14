@@ -11,9 +11,9 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { handleSignup } from "../utils/formSubmission";
-// import { ToastContainer, toast } from "react-toastify";
+import { handleSignup } from "../helpers/formSubmission";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -41,6 +41,7 @@ export default function SignUp() {
   const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [isEmailExist, setIsEmailExist] = useState(false);
   console.log(isUsernameValid);
+  const navigate = useNavigate();
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -69,7 +70,8 @@ export default function SignUp() {
                 setIsUsernameValid,
                 setIsEmailValid,
                 setIsPasswordValid,
-                setIsEmailExist
+                setIsEmailExist,
+                navigate
               )
             }
             sx={{ mt: 3 }}
